@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   //var list for user
   int addrlen, user_sock[MAX_USER]; 
   struct sockaddr_in user_addr[MAX_USER];
-  int numUser = 0;
+  int numUser = 0, portnum = 10000;
   char buf[BUFSIZE];
 
   int i;
@@ -75,17 +75,25 @@ int main(int argc, char* argv[]) {
   	   printf("Connection : Host IP %s, Port %d, socket %d\n",
 		inet_ntoa(user_addr[numUser].sin_addr), ntohs(user_addr[numUser].sin_port), user_sock[numUser]);
 
+	    strcpy(buf, "\0");
+		sprintf(buf, "%d",portnum+numUser);
+		if(write(user_sock[numUser], buf, strlen(buf)) < 0) {
+		perror("write");
+		exit(1);
+		}
+
 	   FD_SET(user_sock[numUser], &reads);
 	   numUser++;
 	}
 	else {
-	   for(i=0; i<numUser; i++) {
+	   for(i=0; i<numUser; i++) 
+	   {
 		//message from user
 		if(FD_ISSET(user_sock[i], &temp)) {
-		   int bytesread = read(user_sock[i], buf, BUFSIZE);
-		   buf[bytesread] = '\0';
-
-		   printf("%s\n", buf);
+		   //int bytesread = read(user_sock[i], buf, BUFSIZE);
+		   //buf[bytesread] = '\0';
+		   //
+		   //printf("%s\n", buf);
 
 		   if(!strcmp(buf, "bye")) {
 			FD_CLR(user_sock[i], &reads);
